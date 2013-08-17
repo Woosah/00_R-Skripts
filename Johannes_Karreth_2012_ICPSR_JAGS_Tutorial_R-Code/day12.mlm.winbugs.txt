@@ -1,0 +1,138 @@
+###############################
+## Day 12: Multilevel models ##
+###############################
+
+## MLM example from beginning to end in WinBUGS
+
+## Use a dataset with the variables 
+
+year 
+ccode 
+milper 
+milex
+
+## Copy into R:
+
+library(psych)
+coerce <- read.clipboard(header=TRUE)
+coerce[1:10, ] ## To test if the copy/paste worked
+
+## Note that WinBUGS will require row-major format (i.e. first across, then down -> therefore we specify byrow=T)
+## Also note that this only works with balanced data...
+
+coerce$year1 <- matrix(coerce$year, nrow=170, ncol=28, byrow=T)
+
+coerce$ccode1 <- matrix(coerce$ccode, nrow=170, ncol=28, byrow=T)
+
+coerce$milper1 <- matrix(coerce$milper, nrow=170, ncol=28, byrow=T)
+
+coerce$milex1 <- matrix(coerce$milex, nrow=170, ncol=28, byrow=T)
+
+## Recall the function writeDatafileR.txt from wherever it is on your HD
+
+source(".../writeDatafileR.txt")
+
+writeDatafileR(list(year=coerce$year1, ccode=coerce$ccode1, milper=coerce$milper1, milex=coerce$milex1, N=4760), ".../example1.txt")
+
+## Now switch to WinBUGS
+
+## Note for JAGS users: For nested data, the safe solution might be to do the same steps, and then read the data into R via example1 <- list(...)
+
+## Write the basic model - this is the foundation for anything you'll ever run!
+
+model{
+	
+	for(i in 1:4760){
+		milex[i] ~ dnorm(mu[i], tau)
+		mu[i] <- alpha + beta * milper[i]
+	}
+	
+	unused <- year[1]+ccode[1]
+	alpha ~ dnorm(0,.001)
+	beta ~ dnorm(0,.001)
+}
+
+## We need to index the variables how they come in the matrix, i.e. by i and t:
+
+model{
+	
+	for(i in 1:170){
+	for(t in 1:28{
+		milex[i,t] ~ dnorm(mu[i,t], tau)
+		mu[i,t] <- alpha + beta * milper[i,t]
+	}
+	}
+	
+	unused <- year[1,1]+ccode[1,1]
+	alpha ~ dnorm(0,.001)
+	beta ~ dnorm(0,.001)
+	tau ~ dgamma(.1,.1)
+}
+
+## Now specify country-specific intercepts:
+
+model{
+	
+	for(i in 1:170){
+	for(t in 1:28{
+		milex[i,t] ~ dnorm(mu[i,t], tau)
+		mu[i,t] <- alpha[i] + beta * milper[i,t]
+	}
+	}
+	
+	unused <- year[1,1]+ccode[1,1]
+	
+	for (i in 1:170){
+	alpha[i] ~ dnorm(0,.001)
+	}
+	
+	beta ~ dnorm(0,.001)
+	tau ~ dgamma(.1,.1)
+}
+
+## Now use an incidental parameter for alpha (helps with model convergence)
+
+model{
+	
+	for(i in 1:170){
+	for(t in 1:28{
+		milex[i,t] ~ dnorm(mu[i,t], tau)
+		mu[i,t] <- alpha[i] + beta * milper[i,t]
+	}
+	}
+	
+	unused <- year[1,1]+ccode[1,1]
+	
+	for (i in 1:170){
+	alpha[i] ~ dnorm(mu.alpha,.001)
+	}
+	
+	mu.alpha ~ dnorm(0,.001)
+	
+	beta ~ dnorm(0,.001)
+	tau ~ dgamma(.1,.1)
+}
+
+## Include covariates to determine the intercepts, and specify country-specific beta-coefficients
+
+model{
+	
+	for(i in 1:170){
+	for(t in 1:28{
+		milex[i,t] ~ dnorm(mu[i,t], tau)
+		mu[i,t] <- alpha[i] + beta[i] * milper[i,t]
+	}
+	}
+	
+	unused <- year[1,1]+ccode[1,1]
+	
+	for (i in 1:170){
+	alpha[i] ~ dnorm(mu.alpha,.001)
+	beta[i] ~ dnorm(mu.beta,.001)
+	}
+	
+	mu.alpha <- g * covariates
+	
+	beta ~ dnorm(0,.001)
+	tau ~ dgamma(.1,.1)
+}
