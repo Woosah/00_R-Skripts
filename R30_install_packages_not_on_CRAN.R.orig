@@ -100,6 +100,35 @@ install.packages("googleVis")
 
 
 
+<<<<<<< HEAD
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
 install.packages(c("RLRsim", "ellipse", "WWGbook"))
 install.packages(c("lme4.0", "nlmeU", "nlmeUpdK"),
                  repos = "http://R-Forge.R-project.org")
@@ -148,6 +177,7 @@ devtools::install_github('R2DOCX', 'davidgohel')
 # 
 # library(foreign)
 # write.foreign(life2, "D:/life.txt", "D:/life.sps",   package="SPSS") 
+>>>>>>> 00_R-Skripts/Arbeit
 
 
 

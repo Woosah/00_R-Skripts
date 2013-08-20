@@ -100,54 +100,33 @@ install.packages("googleVis")
 
 
 
-install.packages(c("RLRsim", "ellipse", "WWGbook"))
-install.packages(c("lme4.0", "nlmeU", "nlmeUpdK"),
-                 repos = "http://R-Forge.R-project.org")
-
-install.packages(c("mlmRev", "pamm"))
-
-
-install.packages("Gqr", repos="http://R-Forge.R-project.org", type = "source")
-install.packages("MEMSS", repos="http://R-Forge.R-project.org", type = "source")
-install.packages("SASmixed", repos="http://R-Forge.R-project.org", type = "source")
-install.packages("lme4.0",repos=c("http://lme4.r-forge.r-project.org/repos",
-                                getOption("repos")), type ="source")
-
-
-install.packages("lme4",repos="http://lme4.r-forge.r-project.org/repos")
-
-install.packages(c("coda", "sfsmisc", "MatrixModels"))
-install.packages("lme4")
-
-install.packages("CORElearn")
-
-install.packages("D:/01 R-Literatur/Max_Kuhn_&_Kjell_Johnson_2013_Springer_-_Applied_Predicitve_Modelling_(1st-Ed)/AppliedPredictiveModeling_1.1-1.tar.gz",
-                 repos = NULL, type = "source")
-
-
-install.packages("msme")
-install.packages("geeM")
-devtools::install_github('R2DOC', 'davidgohel')
-devtools::install_github('R2DOCX', 'davidgohel')
 
 
 
-# data(druguse)
-# demo("Ch-EFA")
-# country = c("Algeria", "Cameroon", "Madagascar", "Mauritius", "Reunion", "Seychelles",
-#               "South Africa (C)", "South Africa (W)",
-#               "Tunisia", "Canada", "Costa Rica", "Dominican Rep.", "El Salvador",
-#               "Greenland", "Grenada", "Guatemala",
-#               "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Trinidad (62)",
-#               "Trinidad (67)",
-#               "United States (66)", "United States (NW66)", "United States (W66)",
-#               "United States (67)", "Argentina",
-#               "Chile", "Colombia", "Ecuador")
-# 
-# life2 <- as.data.frame(cbind(country, life))
-# 
-# library(foreign)
-# write.foreign(life2, "D:/life.txt", "D:/life.sps",   package="SPSS") 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
