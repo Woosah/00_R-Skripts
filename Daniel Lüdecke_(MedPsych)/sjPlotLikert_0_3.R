@@ -1,4 +1,4 @@
-#' @name sjPlotLikert.R (V0.2)
+#' @name sjPlotLikert.R (V0.3)
 #' 
 #' @author Daniel Lüdecke (d.luedecke@uke.de)
 #' 
@@ -326,23 +326,86 @@ sjp.likert <- function(items,
   if (!is.null(orderBy)) {
     if (orderBy=="pos") {
       pos <- ddply(pos, "Question", transform, ytotal = sum(Freq))
-      do <- order(pos$ytotal)
+      orderGroupedItems <- order(pos$ytotal)
     }
     else {
       neg <- ddply(neg, "Question", transform, ytotal = sum(abs(Freq)))
-      do <- order(neg$ytotal)
+      orderGroupedItems <- order(neg$ytotal)
     }
+    # ------------
+    # in "orderGroupedItems", we have now a "grouped" order. each "group" consists of data 
+    # with equal count to the positive or negative amount of legend labels (i.e.
+    # half of the amount of all legendLabels).
+    # The amount of groups, however, is related to the amount of items we have.
+    # Example: We have 5 items with 6 categories (legendLabels) each,
+    # for instance "very strong disagree", "strong disagree", "disagree", "agree",
+    # "strong agree", "very strong agree".
+    # Now "orderGroupedItems" consists of five groups (= 5 items) and each "group" has three
+    # data rows (6 categories divided by 2 (pos and neg)).
+    # So we have 15 data rows.
+    #
+    # Example: "pos" after applying ddply-function:
+    #     Question Response  Freq  ypos ytotal
+    #     1        Q5        4 0.266 0.133  0.442
+    #     2        Q5        5 0.050 0.291  0.442
+    #     3        Q5        6 0.126 0.379  0.442
+    #     4        Q4        4 0.406 0.203  0.588
+    #     5        Q4        5 0.084 0.448  0.588
+    #     6        Q4        6 0.098 0.539  0.588
+    #     7        Q3        4 0.200 0.100  0.570
+    #     8        Q3        5 0.196 0.298  0.570
+    #     9        Q3        6 0.174 0.483  0.570
+    #     10       Q2        4 0.094 0.047  0.376
+    #     11       Q2        5 0.078 0.133  0.376
+    #     12       Q2        6 0.204 0.274  0.376
+    #     13       Q1        4 0.294 0.147  0.596
+    #     14       Q1        5 0.216 0.402  0.596
+    #     15       Q1        6 0.086 0.553  0.596
+    #
+    # Now "orderGroupedItems" looks like following:
+    # [1] 10 11 12  1  2  3  7  8  9  4  5  6 13 14 15
+    # 
+    # So we have the order from lowest sum of positive or negative
+    # answer frequencies to highest, but three times each. for ordering
+    # the legend labels, we have to transform "orderGroupedItems", see below!
+    # ------------
+    pos$Freq <- pos$Freq[orderGroupedItems]
+    neg$Freq <- neg$Freq[orderGroupedItems]
+    pos$ypos <- pos$ypos[orderGroupedItems]
+    neg$ypos <- neg$ypos[orderGroupedItems]
     
-    pos$Freq <- pos$Freq[do]
-    neg$Freq <- neg$Freq[do]
-    pos$ypos <- pos$ypos[do]
-    neg$ypos <- neg$ypos[do]
-
-    du <- c(ceiling(do/(length(legendLabels)/2)))
-    da <- c(unique(du))
-    # da <- du[c(seq(1,length(du), by=2))]
-    # di <- rev(length(axisLabels.x)+1-da)
-    axisLabels.x <- axisLabels.x[da]
+    # since "orderGroupedItems" has numbers from 1 to (items * legendLabels/2) - i.e. 1 to 15
+    # in this example -, we need to know, which "group" belongs to which item. we do
+    # this by dividing these numbers by "amount of positive / negative legendLabels",
+    # i.e. "orderGroupedItems" will be divided by (length of legendLabels / 2).
+    orderRelatedItems <- c(ceiling(orderGroupedItems/(length(legendLabels)/2)))
+    
+    # now we have the in "orderUniqueItems" the items assigned to each row of the data frame
+    # pos resp. neg:
+    # [1] 4 4 4 1 1 1 3 3 3 2 2 2 5 5 5
+    # Next, we just need each item number once, so extract the unique values
+    orderUniqueItems <- c(unique(orderRelatedItems))
+    
+    # now we have in "oderUniqueNumbers" the items with the lowest frequencies
+    # to highest frequencies, with each number pointing the question position, beginng
+    # from the end.
+    # Example, how "oderUniqueNumbers" looks like:
+    # [1] 4 1 3 2 5
+    # That means, when we have 5 questions / items, the 4th question/item, counted 
+    # from the end, is question/item 2.
+    # Thus, question/item 2 has the lowest total frequencies (first position in
+    # "oderUniqueNumbers", last position in order).
+    # The second number in "oderUniqueNumbers" is "1", i.e. the first question from the
+    # end is question 5, which appears at position 2 with the lowest total frequencies.
+    # 
+    # So we now have to switch index from (end to beginning) to (beginning to end)
+    # and reverse the order to start with highest frequencies.
+    orderUniqueItems <- rev((length(legendLabels))-orderUniqueItems)
+    
+    # The result in "orderUniqueItems" now is
+    # [1] 1 4 3 5 2
+    # with this we can order the axis labels (item/question labels)
+    axisLabels.x <- axisLabels.x[orderUniqueItems]
   }
 
   

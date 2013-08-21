@@ -1,8 +1,10 @@
-#' @name sjPlotStackFrequencies.R (V0.1)
+#' @name sjPlotStackFrequencies.R (V0.2)
 #' 
 #' @author Daniel Lüdecke (d.luedecke@uke.de)
+#' @note Thanks to Forrest Stevens (http://www.clas.ufl.edu/users/forrest/) for bug fixes
 #' 
 #' @description Plot items (variables) of a scale as stacked proportional bars
+#' see http://strengejacke.wordpress.com/2013/07/17/plotting-likert-scales-net-stacked-distributions-with-ggplot-rstats/
 #' 
 #' Distributed under the GNU GPL v3 (and higher) license. There’s no warranty that the scripts
 #' work 100% correctly! If you find any bugs or have suggestions on how to improve them, please let me know.
@@ -217,12 +219,17 @@ sjp.stackfrq <- function(items,
     }
     # give columns names
     names(df) <- c("var", "prc")
-    # convert to numeric
-    df$var <- as.numeric(as.character(df$var))
-    # if categories start with zero, fix this here
-    if (min(df$var)==0) {
-      df$var <- df$var+1
-    }
+
+		##	FRS:  I can't suss out why we convert to numeric but rather than
+		##		this I'm just going to number them:
+    ## convert to numeric
+    #df$var <- as.numeric(as.character(df$var))
+    ## if categories start with zero, fix this here
+    #if (min(df$var)==0) {
+    #  df$var <- df$var+1
+    #}
+		df$var <- 1:length(df$var)
+
     # Create a vector of zeros 
     prc <- rep(0,countlen)
     # Replace the values in prc for those indices which equal df$var
