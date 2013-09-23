@@ -49,5 +49,9 @@ c("AGSDest", "bayespack", "BPHO", "BradleyTerry", "coefplot2",
   "mprobit", "panel", "pcurve", "pisa", "predbayescor", "ReadImages", 
   "spikeslab", "ThreeGroups", "ZeligNetwork")
 
+install.packages("astsa")
+install.packages("lsmeans")
+install.packages("lmerTest")
+
 
 
