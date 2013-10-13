@@ -130,7 +130,9 @@ install.packages("geeM")
 devtools::install_github('R2DOC', 'davidgohel')
 devtools::install_github('R2DOCX', 'davidgohel')
 
-
+install.packages("heavy")
+install.packages("robustlmm")
+install.packages("BEST")
 
 # data(druguse)
 # demo("Ch-EFA")
