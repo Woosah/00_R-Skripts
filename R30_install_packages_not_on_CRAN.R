@@ -1,6 +1,12 @@
+library(rstan)
+set_cppo('fast')
+detach("package:rstan", unload = TRUE)
 remove.packages('rstan')
-options(repos = c(getOption("repos"), rstan = "http://wiki.stan.googlecode.com/git/R"))
-install.packages('rstan', type = 'source')
+library(devtools)
+# install_url('https://github.com/stan-dev/rstan/releases/download/v2.0.0/rstan_2.0.0.tar.gz')
+install.packages('D:/rstan_2.0.0.tar.gz', repos=NULL, type = 'source')
+
+
 
 library(rstan)
 set_cppo("fast")
@@ -20,7 +26,7 @@ schools_code <- '
   transformed parameters {
     real theta[J];
     for (j in 1:J)
-      theta[j] <- mu + tau * eta[j];
+    theta[j] <- mu + tau * eta[j];
   }
   model {
     eta ~ normal(0, 1);
@@ -38,7 +44,7 @@ fit <- stan(model_code = schools_code, data = schools_dat,
 print(fit)
 fit3 <- stan(fit = fit2, data = schools_dat, iter = 1000000, chains = 4)
 print(fit3)
-plot(fit2)
+plot(fit)
 
 save(fit3, file = "fit3.RData")
 
@@ -53,30 +59,30 @@ library(devtools)
 install_github(repo='jagstools', username='johnbaums')
 
 
-install.packages("D:/05 R-Literatur/13 GAMLSS/gamlss.boot_1.6-5.zip", repos = NULL)
-install.packages("D:/05 R-Literatur/13 GAMLSS/gamlss.rsm_1.0.zip", repos = NULL)
-install.packages("D:/05 R-Literatur/13 GAMLSS/gamlss.sparse_0.0-1.zip", repos = NULL)
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/concord_1.4-9.tar.gz", 
+install.packages("D:/01 R-Literatur/13 GAMLSS/gamlss.boot_1.6-5.zip", repos = NULL)
+install.packages("D:/01 R-Literatur/13 GAMLSS/gamlss.rsm_1.0.zip", repos = NULL)
+install.packages("D:/01 R-Literatur/13 GAMLSS/gamlss.sparse_0.0-1.zip", repos = NULL)
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/concord_1.4-9.tar.gz", 
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/covRobust_1.0.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/covRobust_1.0.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/mblm_0.11.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/mblm_0.11.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/mimR_2.6.2.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/mimR_2.6.2.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/MISA_2.11.1-1.0.1.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/MISA_2.11.1-1.0.1.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/mixer_1.5.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/mixer_1.5.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/moc_1.0.5.1.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/moc_1.0.5.1.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/mprobit_0.9-3.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/mprobit_0.9-3.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/pcurve_0.6-3.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/pcurve_0.6-3.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/predbayescor_1.1-4.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/predbayescor_1.1-4.tar.gz",
                  repos = NULL, type = "source")
-install.packages("D:/05 R-Literatur/10 R-Packages_Manuals/ThreeGroups_0.1.tar.gz",
+install.packages("D:/01 R-Literatur/10 R-Packages_Manuals/ThreeGroups_0.1.tar.gz",
                  repos = NULL, type = "source")
 install_github('pisa', 'jbryer')
 install_github('TriMatch', 'jbryer')
@@ -130,7 +136,10 @@ install.packages("geeM")
 devtools::install_github('R2DOC', 'davidgohel')
 devtools::install_github('R2DOCX', 'davidgohel')
 
-
+install.packages("heavy")
+install.packages("robustlmm")
+install.packages("BEST")
+install.packages("bootES")
 
 # data(druguse)
 # demo("Ch-EFA")
