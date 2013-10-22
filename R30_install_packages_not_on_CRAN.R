@@ -150,7 +150,10 @@ devtools::install_github('R2DOCX', 'davidgohel')
 # write.foreign(life2, "D:/life.txt", "D:/life.sps",   package="SPSS") 
 
 
-
+install.packages(c("RLRsim", "WWGbook", "ellipse"))
+install.packages("lme4.0", type = "source", repos = "http://R-Forge.R-project.org")
+install.packages("nlmeU", repos = "http://R-Forge.R-project.org")
+install.packages("nlmeUpdK", repos = "http://R-Forge.R-project.org")
 
 
 
