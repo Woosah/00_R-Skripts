@@ -164,7 +164,8 @@ install.packages("lme4.0", type = "source", repos = "http://R-Forge.R-project.or
 install.packages("nlmeU", repos = "http://R-Forge.R-project.org")
 install.packages("nlmeUpdK", repos = "http://R-Forge.R-project.org")
 
-
+install.packages("TableToLongForm")
+install.packages("compare")
 
 
 
