@@ -1,0 +1,161 @@
+```{r libs,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+require(plyr)
+require(ggplot2)
+library(rstan)
+library(reshape2)
+setwd(Sys.getenv("GITHUB_PATH"))
+setwd("./misc/stan models/increasing by chi square increments/")
+
+#Most of the actual work is done in these files (and the Stan model chi_square_jumps hierarchical.stan). Check them out if you want the details:
+source("data generation etc.R")
+```
+
+*This post will describe a way I came up with of fitting a function that's constrained to be increasing, using [Stan](http://mc-stan.org/). If you want practical help, standard statistical approaches, or expert research, this isn't the place for you (look up "isotonic regression" or "Bayesian isotonic regression" or David Dunson, whose work Andrew Gelman pointed me to). This is the place for you if you want to read about how I thought about setting up a model, implemented the model in Stan, and created graphics to understand what was going on.*
+
+*[Here's](http://github.com/dchudz/misc/blob/master/stan%20models/increasing%20by%20chi%20square%20increments/chi_squared_jumps_hierarchical.Rmd) the source for this post, including markdown and and R code.*
+
+*Many thanks to [Naftali Harris](http://www.naftaliharris.com/) for comments and insights on an earlier version.*
+
+I recently read [a paper that Andrew Gelman wrote back in 1996](http://www.stat.columbia.edu/~gelman/research/published/deep.pdf) about theoretical considerations that can restrict model choice even "in the abence of data with minimal applied context". As one example, he describes the problem fitting a function $f(t)$ that is known to be increasing and where $f(0)=0$ and $f(1)=1$ are known. We estimate the function at $(N-1)$ equally spaced sample points, with $\theta_i=f(\frac{i}{N})$ (for $i \in \{1,2,3,...,N-1\}$).
+
+What prior should we use for the $\{\theta_i\}$? It might seem like a reasonable "uninformative" prior would make the $\{\theta_i\}$ independent and uniform on $[0,1]$, with the restriction that non-increasing sets of $\{\theta_i\}$ are given zero probability. But this turns out badly! Gelman notes that this prior on the $\{\theta_i\}$ is the same as the distribution of the order statistics of a samples of size $N-1$ from the uniform distribution on $[0,1]$. As the number of points in the discretization increases, the mass of the prior concentrates around a straight line, which will overwhelm the data.
+
+To illustrate, here are some samples from this distribution, for various $N$:
+
+```{r sample_from_restricted_uniform, cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+
+
+sample_from_restricted_uniform <- function(N) {
+  data.frame(theta = c(0,sort(runif(N-1)),1), t=(0:N)/N)
+}
+
+k_samples_N_internals <- function(N, k, sample_function)
+  ldply(1:k, function(k) {
+    samples <- sample_function(N)
+    samples$sample_num = k
+    samples$N = N
+    samples
+  })
+
+samples <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, sample_from_restricted_uniform))
+ggplot(data=transform(samples, N=factor(N))) + 
+  geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
+  ggtitle("Samples from uniform distribution (with monotonicity)")
+
+```
+
+This weird! Under the uniform distribution, each (legal) path is equally likely. That's why if we fit this model to noisy data, the maximum likelihood estimate (which is the mode of the posterior) would be reasonable. But it turns out that for large $k$, almost all legal paths are basically straight lines, so the bulk of the posterior would be basically a straight line no matter what the data say. It reminds me a bit of statistical mechanics, which is largely about micro-level randomness determining macro-level properties. (I'm no expert, but I recommend [this book](http://pages.physics.cornell.edu/~sethna/StatMech/).)
+
+So what model should we use instead? For my convenience (and perhaps to be more realistic) I'll switch to the case where $\theta_N$ (that is, $f(1)$) isn't known to be $1$. The goal is the have a model which will behave in the same way at each scale of discretization -- our results shouldn't differ too much when $N=10$ vs. $N=100$. To accomplish this, I model the $\{\theta_i\}$ as incrementing by jumps drawn from a chi squared distribution. This is nice since 1 jump that's distributed as $\chi^2(k_0)$ is then equivalent to  $n$ independent jumps that are distributed as $\chi^2(k_0/N)$. (This means that the function $f$ is necessarily discontinuous, which may not be so nice! More on that below.) Then our prior for the function $f$ is independent of the scale of the discretization, as long as we scale the parameter correctly:
+
+$$\theta_i \sim \theta_{i-1} + s \cdot \chi^2(k_0/N)$$ 
+
+I've added a factor of $s$ to the jumps to allow control of the mean and variance of the jumps independently.
+
+I'll assume that we have data $y_i$ from a normal distribution centered on $\theta_i$ (independent, conditional on $\theta_i$). The variance of the $\{y_i\}$  should scale with $N$, since I'm assuming that if we sampled at a coarser scale, the $\{y_i\}$ at a coarser scale would be an average of the $\{y_i\}$ at a finer scale (and thus have lower variance):
+
+$$y_i \sim N(\theta_i, N \cdot \sigma_y^2)$$
+
+I'm giving the hyperparameters $k_0$, $s$, $\sigma_y$ uniform distributions. These aren't meant to be "uninformative" priors at all; just an example (in real life you'd do something reasonable for the problem at hand):
+
+$$s \sim U[0,2]$$
+$$k_0 \sim U[10,50]$$
+$$\sigma_y \sim U[0,1]$$
+
+This parametrization may not be ideal. Intuitively, maybe how "straight" the line is should be specified independently of how "high" the line goes (here $k_0$ affects both)
+
+Here are some samples from my prior for the $\theta_i$, conditional on the specified $k_0$, $s$:
+
+```{r samples_from_theta_prior_and_hyperparameters,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+
+addZerosToSamples <- function(samples) {
+  samplesZero <- samples[!duplicated(samples[,c("sample_num","N")]),]
+  samplesZero[,c("theta","y","t")] <- 0
+  rbind(samples,samplesZero)
+}
+
+k_0 <- 10
+s <- 1
+samples <- ldply(c(10,100,1000), 
+                 function(N) k_samples_N_internals(N, 20, function(N) generate_data(k_0, s, N, 1)))
+
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + 
+  geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
+  ggtitle(paste("prior for thetas, k_0 =", k_0, ", s =", s))
+```
+
+As $k_0$ gets large, the $\{\theta_i\}$ tend toward a straight line.
+
+```{r error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+k_0 <- 50
+s <- 1
+samples <- ldply(c(10,100,1000), 
+                 function(N) k_samples_N_internals(N, 20, function(N) generate_data(k_0, s, N, 1)))
+
+ggplot(data=transform(addZerosToSamples(samples), N=factor(N))) + 
+  geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) +
+  ggtitle(paste("prior for thetas, k_0 =", k_0, ", s =", s))
+```
+
+Here are samples from my prior for $\{\theta_i\}$, sampling from the prior distribution for the hyperparameters $k_0$ and $s$ (rather than specifying them as above). The shape of the function $f$ does not depend on $N$ as it did with the naive prior:
+
+```{r samples_from_theta_prior_and_hyperparameters2,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+samples3 <- ldply(c(10,100,1000), function(N) k_samples_N_internals(N, 20, generate_data_including_hyperparameters))
+ggplot(data=transform(addZerosToSamples(samples3), N=factor(N))) + 
+  geom_line(mapping=aes(x=t, y=theta, color=N, group=paste(N,sample_num))) + 
+  ggtitle("prior for thetas, sampling hyperparameters") +
+  coord_cartesian(ylim=c(0,50))
+```
+
+I'll illustrate the model by fitting to one set of samples $\{y_i\}$, generated by setting with $k_0=30$, $s=1$, $\sigma_y=0.5$, $N=50$, and sampling 
+
+$$\theta_i \sim \theta_{i-1} + s \cdot \chi^2(k_0/N)$$ 
+
+and
+
+$$y_i \sim N(\theta_i, N \cdot \sigma_y^2).$$
+
+
+```{r fit_model, fig.show='hide', cache=TRUE,error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+set.seed(2)
+k_0 <- 30
+s=1
+N=50
+sigma_y=0.5
+fake_data <- generate_data(k_0,s,N,sigma_y)
+plot_fake_data(fake_data)
+
+fit1 <- stan("chi_squared_jumps hierarchical.stan", 
+                 data = list(N=50, y=fake_data$y), iter = 1000, chains = 4)
+```
+
+Here are the true $\{\theta_i\}$ and the posterior means for $\{\theta_i\}$:
+
+```{r dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+fake_data$posterior_theta_means <- get_posterior_mean(fit1,pars="theta")[,5]
+plot_fake_data(fake_data)+
+    geom_line(data=fake_data, aes(x=t,y=posterior_theta_means, color="posterior theta means"))
+```
+
+Since the posterior means are means, they are quite a lot smoother than the truth. Here are samples from the posterior for $\{\theta_i\}$ from each model. You can see that the "shape" of each sample is much more like the shape of the truth:
+
+```{r plot_posterior_sample_thetas, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+plot_samples(list(fit=fit1, fake_data=fake_data), 20)
+```
+
+The posterior distribution for the hyperparameter $k_0$ is very wide -- across most of the range of the prior (uniform on $[10,50]$), the posterior is not so different from the prior. I think there isn't enough information to fit them well, so the prior will necessarily has a large influence.
+
+```{r posterior_hyperparameters, dependson="fit_model",error=FALSE, warning=FALSE, results='hide', message=FALSE, echo=FALSE}
+plot_posteriors(fit1, "k_0", k_0)
+plot_posteriors(fit1, "s", s)
+plot_posteriors(fit1, "sigma_y", sigma_y)
+
+```
+
+Another approach to building a model which would be insensitive to the scale of the discretization would have been to *start with* a continuous-time, monotone stochastic process on $[0, 1]$, and let the joint prior for $\{\theta_i\}$ follow from that. That would guarantee up front that the model is reasonable for any degree of discretization. We'd also have the advantage of starting with an understanding of what our process is like in the continuous limit as $N \rightarrow \infty$.
+
+For example, I only realized partway through this project that **the process I'm describing is discontinuous** (in the limit). (Proof: The limit of this process is a Levy process, in that it has stationary, independent increments.  The independent increments part is obvious; you even get it in the finite approximations. Levy processes are either Brownian Motion with drift, straight lines, or have discontinuous paths.  The limit isn't either of the former two, and so must have discontinuous paths.)
+
+A discontinuous model like this might be appropriate for some applications, but not for many. Adding a correlation structure to the jumps would be a reasonable expansion of the model and might be a good way of forcing the paths to be continuous.
+
+Please let me know if you have any comments or suggestions! The flexibility of Stan is very powerful, but that includes the power to fit a bad model. Examining a model's behavior under simulated data is one way to check it. I haven't done all of the checks I'd want to, but hopefully this will provide an interesting example.
