@@ -166,7 +166,7 @@ install.packages("nlmeUpdK", repos = "http://R-Forge.R-project.org")
 
 install.packages("TableToLongForm")
 install.packages("compare")
-
+install.packages("nadiv")
 
 
 
