@@ -169,8 +169,8 @@ install.packages("compare")
 install.packages("nadiv")
 
 
+devtools::install_github("DataCombine", "christophergandrud")
 
 
-
-
+devtools::install_github("medley","mewo2")
 
