@@ -174,3 +174,4 @@ devtools::install_github("DataCombine", "christophergandrud")
 
 devtools::install_github("medley","mewo2")
 
+devtools::install_github("lme4",user="lme4")
