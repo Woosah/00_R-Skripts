@@ -39,7 +39,7 @@ ggCaterpillar <- function(re, QQ=TRUE, likeDotplot=TRUE, LatexOptions = TRUE) {
 			p <- p + geom_errorbar(aes(ymin=y-ci, ymax = y + ci), width = 0, colour="black", cex = 1.05)
 			p <- p + geom_point(aes(size=1.2), colour="black")
 			p <- p + theme_bw()
-			p <- p + xlab("") + ylab("Varianz der random effects")
+			p <- p + xlab("") + ylab(expression(paste("Varianz der ", italic("random effects"), sep = "")))
 			p <- p + theme(plot.title = element_text(size = 20, face = "bold",
 																							 family = "Times", vjust = 2),
 										 axis.title.y = element_text(family = "Times", size = 15,
