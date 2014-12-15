@@ -36,7 +36,8 @@ ggCaterpillar <- function(re, QQ=TRUE, likeDotplot=TRUE, LatexOptions = TRUE, co
             p <- p + theme(legend.position="none")
         } else if (LatexOptions) {
             y_axis_size <- ifelse(nrow(pDf) <= 60, 10, 8)
-            
+            x_axis_size <- ifelse(coordflip, 14, ifelse(nrow(pDf) <= 60, 12, 10))
+           
             p <- p + geom_errorbar(aes(ymin=y-ci, ymax = y + ci), width = 0, colour="black", cex = 1.05)
             p <- p + geom_point(aes(size=1.2), colour="black")
             p <- p + theme_bw()
@@ -47,7 +48,7 @@ ggCaterpillar <- function(re, QQ=TRUE, likeDotplot=TRUE, LatexOptions = TRUE, co
                                                        vjust = 1.5, face = "bold"),
                            axis.title.x = element_text(family = "Times", size = 15,
                                                        face = "bold", vjust = -0.25),
-                           axis.text.x = element_text(family = "Times", size = 14,
+                           axis.text.x = element_text(family = "Times", size = x_axis_size,
                                                       face = "bold"),
                            axis.text.y = element_text(family = "Times", size = y_axis_size),
                            strip.text = element_text(family = "Times", colour = "black",
@@ -56,7 +57,7 @@ ggCaterpillar <- function(re, QQ=TRUE, likeDotplot=TRUE, LatexOptions = TRUE, co
             p <- p + theme(legend.position="none")
         }
         if (!coordflip) p <- p + theme(axis.text.x = element_text(angle = 45, hjust = 1, face = 1),
-                                       axis.text.y = element_text(face = "bold", size = 12),
+                                       axis.text.y = element_text(face = "bold"),
                                        axis.title.y = element_text(face = "bold", size = 16))
         return(p)
     }
