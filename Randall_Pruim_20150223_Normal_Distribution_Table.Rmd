@@ -1,0 +1,34 @@
+---
+title: "Normal Distribution Table by Randall Pruim"
+author: 
+date: "23.02.2015"
+output: pdf_document
+---
+
+The table gives values for $P(Z \le z)$ where $z$ is the sum of the left and right headers.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7.0, fig.height = 1.5}
+library(grid)        # for the plot
+library(mosaic)      # for the plot
+trellis.par.set(theme=theme.mosaic())   # change default colors for plot
+plotDist("norm", groups = x >= 1, type="h")
+ladd(grid.text(label=expression(P(Z <= z)), x = .2, y = .7))
+```
+
+
+```{r results="asis", echo=FALSE}
+library(xtable)
+big <- seq(0, 3.5, by = 0.1)
+little <- seq(0, 0.09, by = 0.01)
+norm_table <- outer(big, little, function(x,y) pnorm(x+y))
+row.names(norm_table) <- format(big, digits=1)
+colnames(norm_table)  <- format(little, digits=2)
+print(
+  xtable(
+    norm_table,
+    digits=4,                          # display 4 digits
+    align="|r|rrrrrrrrrr|"             # additional vertical lines
+  ),
+  hline.after = c(-1, seq(0, nrow(norm_table), by=4)),  # additional horizontal lines
+  comment=FALSE)                       # avoid latex comment about table generation
+```
