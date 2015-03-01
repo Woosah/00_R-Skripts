@@ -54,7 +54,7 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
         } else if (abs(p.num) <= 0.01 & abs(p.num) > 0.001) {
             Wert <- paste('=~', gsub('0\\.', '.', round(p.num, dig = DIGITS)), '^{**}', sep = '')
         } else if (abs(p.num) < 0.001) {
-            Wert <- '<~.001^{***}' 
+            Wert <- '<~.001' 
         }
         as.character(Wert)
     }
@@ -71,7 +71,7 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
         } else if (abs(p.num) <= 0.01 & abs(p.num) > 0.001) {
             Wert <- paste(gsub('0\\.', '.', round(p.num, dig = DIGITS)), '^{**}', sep = '')
         } else if (abs(p.num) < 0.001) {
-            Wert <- '<~.001^{***}' 
+            Wert <- '<~.001' 
         }
         as.character(Wert)
     }
