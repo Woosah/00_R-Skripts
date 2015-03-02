@@ -25,6 +25,8 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
     zahlenPrintOhneSternMitGleich <- function(p.num, DIGITS = DIG) {
         if (abs(p.num) < 0.001) {
             Wert <- '<~.001' 
+        } else if (abs(p.num) > 0.9) {
+            Wert <- '>~.9'
         } else {
             Wert <- paste('=~', gsub('0\\.', '.', round(p.num, dig = DIGITS)), sep = '')
         }
@@ -36,6 +38,8 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
     zahlenPrintOhneSternOhneGleich <- function(p.num, DIGITS = DIG) {
         if (abs(p.num) < 0.001) {
             Wert <- '<~.001' 
+        } else if (abs(p.num) > 0.9) {
+            Wert <- '>~.9'
         } else {
             Wert <- paste(gsub('0\\.', '.', round(p.num, dig = DIGITS)), sep = '')
         }
@@ -45,7 +49,7 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
     # Funktion zum Drucken von Werten ohne Null vorm 'Komma' und mit Sternen und mit 
     # Gleichheitszeichen:
     zahlenPrintMitSternMitGleich <- function(p.num, DIGITS = DIG) {
-        if (abs(p.num) <= 1 & abs(p.num) > 0.1) {
+        if (abs(p.num) <= 0.9 & abs(p.num) > 0.1) {
             Wert <- paste('=~', gsub('0\\.', '.', round(p.num, dig = DIGITS)), sep = '')
         } else if (abs(p.num) <= 0.1 & abs(p.num) > 0.05) {
             Wert <- paste('=~', gsub('0\\.', '.', round(p.num, dig = DIGITS)), '^{+}', sep = '')
@@ -55,14 +59,16 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
             Wert <- paste('=~', gsub('0\\.', '.', round(p.num, dig = DIGITS)), '^{**}', sep = '')
         } else if (abs(p.num) < 0.001) {
             Wert <- '<~.001' 
-        }
+        } else if (abs(p.num) > 0.9) {
+            Wert <- '>~.9'
+        } 
         as.character(Wert)
     }
     
     # Funktion zum Drucken von Werten ohne Null vorm 'Komma' und mit Sternen, aber ohne 
     # Gleichheitszeichen:
     zahlenPrintMitSternOhneGleich <- function(p.num, DIGITS = DIG) {
-        if (abs(p.num) <= 1 & abs(p.num) > 0.1) {
+        if (abs(p.num) <= 0.9 & abs(p.num) > 0.1) {
             Wert <- paste(gsub('0\\.', '.', round(p.num, dig = DIGITS)), sep = '')
         } else if (abs(p.num) <= 0.1 & abs(p.num) > 0.05) {
             Wert <- paste(gsub('0\\.', '.', round(p.num, dig = DIGITS)), '^{+}', sep = '')
@@ -72,7 +78,9 @@ zahlenPrint <- function(p, DIG = 3, Zeichen = TRUE, Stern = FALSE) {
             Wert <- paste(gsub('0\\.', '.', round(p.num, dig = DIGITS)), '^{**}', sep = '')
         } else if (abs(p.num) < 0.001) {
             Wert <- '<~.001' 
-        }
+        } else if (abs(p.num) > 0.9) {
+            Wert <- '>~.9'
+        } 
         as.character(Wert)
     }
     
