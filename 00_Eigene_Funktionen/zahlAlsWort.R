@@ -1,9 +1,9 @@
 ### Kleine Funktion, um in Latex-Texten die Zahlen von 1 bis 12 durch das 
 ### entsprechende deutsche Wort zu ersetzen.
 
-zahlAlsWort <- function(zahl, gross = FALSE) {
-    zahlen <- c("eins", "zwei", "drei", "vier", "fünf", "sechs",
-                "sieben", "acht", "neun", "zehn", "elf", "zwölf")
+zahlAlsWort <- function(zahl, gross = FALSE) { 
+    zahlen <- c("eins", "zwei", "drei", "vier", 'f\\"{u}nf', "sechs", 
+                "sieben", "acht", "neun", "zehn", "elf", 'zw\\"{o}lf')
     names(zahlen) <- c(1:12)
     if (abs(zahl) > 12) {
         message("Zahlen ueber zwoelf werden nicht als Wort ausgeschrieben...die Zahl wird unveraendert ausgegeben!")
